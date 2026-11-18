@@ -6,9 +6,9 @@
 ## 👥 Integrantes del Equipo
 * [Alejandro Pelechá]
 * [Viviana Chillagana]
-* [Hector]
-* [Brian]
-* [Nicolas]
+* [Hector Palomino]
+* [Brian Diaz]
+* [Nicolas Salazar]
 
 ---
 
