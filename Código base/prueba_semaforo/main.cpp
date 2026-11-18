@@ -1,9 +1,48 @@
+#include <iostream>     // Para mostrar mensajes por la consola (std::cout)
+#include <thread>       // Para poder crear y gestionar hilos (std::thread)
+#include <vector>       // Para guardar los hilos en un vector dinámico y controlarlos fácilmente
+#include <chrono>       // Para manejar tiempos y pausas (std::this_thread::sleep_for)
+#include "Semaforo.h"   // Importa la clase Semaforo programada por tu compañero
+
 // Prueba de la clase Semaforo frente a std::counting_semaphore (apartado 1.4 del enunciado).
 // TODO: implementar.
 
-#include <iostream>
+// Instanciamos nuestro semáforo con valor inicial 1 (exclusión mutua)
+Semaforo semaforoPrueba(1);
+
+void tareaConcurrente(int idHilo) {
+    std::cout << "[Hilo " << idHilo << "] Intentando entrar en la sección crítica...\n";
+
+    // Probamos la adquisición del semáforo
+    semaforoPrueba.acquire(); // Si el semáforo está en 0, el hilo se queda aquí esperando dormido.
+
+    std::cout << "--> [Hilo " << idHilo << "] ¡EN LA SECCIÓN CRÍTICA!\n";
+
+    // Simulamos un trabajo dentro de la sección crítica (simula procesar algo durante 200ms)
+    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+
+    std::cout << "<-- [Hilo " << idHilo << "] Saliendo de la sección crítica.\n";
+
+    // Liberamos el semáforo para que otro hilo que esté esperando pueda entrar
+    semaforoPrueba.release();
+}
 
 int main() {
-    std::cout << "prueba_semaforo: sin implementar\n";
-    return 1;
+    std::cout << "=== INICIO DE LA PRUEBA DE SEMÁFORO (Módulo 3) ===\n";
+
+    const int numeroHilos = 5;
+    std::vector<std::thread> hilos;
+
+    // Lanzamos varios hilos concurrentes
+    for (int i = 0; i < numeroHilos; ++i) {
+        hilos.emplace_back(tareaConcurrente, i + 1);
+    }
+
+    // Esperamos a que todos los hilos terminen de ejecutarse antes de cerrar el programa
+    for (auto& t : hilos) {
+        t.join();
+    }
+
+    std::cout << "=== PRUEBA DE SEMÁFORO FINALIZADA CON ÉXITO ===\n";
+    return 0;
 }
