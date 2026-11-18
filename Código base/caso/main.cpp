@@ -1,31 +1,63 @@
-// main del caso. Vuestro trabajo: rellenar ejecutarSimulacion y las listas de claves y modos.
-// Mirad ejemplo/main.cpp para ver cómo se usan las clases del proyecto base.
-// Vuestras 3 clases van en esta misma carpeta (caso/), cada una en su .h y su .cpp,
-// y sus .cpp se añaden a caso/CMakeLists.txt.
-
 #include "Config.h"
+#include "Contexto.h"
 #include "Estadisticas.h"
 #include "Lanzador.h"
+#include "Linea.h"
 #include "Traza.h"
 #include "Vigilante.h"
 
+#include <algorithm>
 #include <chrono>
 #include <string>
+#include <thread>
+#include <vector>
 
 bool ejecutarSimulacion(const Config& config, Estadisticas& estadisticas, Traza& traza, const std::string& etiqueta) {
-    (void)traza;
+    int estaciones = std::max(2, config.entero("estaciones", 5));
+    int andenes = config.entero("andenes", 2);
+    int trenes = config.entero("trenes", 10);
+    int capacidadTramo = config.entero("capacidad_tramo", 2);
+    int viajes = config.entero("viajes", 30);
+    int tTramo = config.entero("t_tramo", 3);
+
     Vigilante vigilante(std::chrono::milliseconds(config.entero("vigilante", 2000)), estadisticas, etiqueta);
+    Contexto ctx{config, estadisticas, traza, vigilante};
+    Linea linea(ctx, estaciones, andenes, capacidadTramo, tTramo);
+
     vigilante.iniciar();
 
-    // TODO: crear los objetos, lanzar los hilos, cierre ordenado, invariantes finales.
+    // Lanzar los hilos: generadores (uno por estación), mantenimiento y trenes.
+    std::vector<std::thread> generadores;
+    for (int e = 0; e < estaciones; ++e) {
+        generadores.emplace_back(&Estacion::hiloGenerador, &linea.estacion(e));
+    }
+    std::thread mantenimiento(&Linea::hiloMantenimiento, &linea);
+    std::vector<std::thread> hilosTrenes;
+    for (int k = 0; k < trenes; ++k) {
+        hilosTrenes.emplace_back(&Linea::hiloTren, &linea, k, viajes);
+    }
 
+    // Cierre: primero los trenes, luego el mantenimiento y las colas de pasajeros.
+    for (auto& t : hilosTrenes) {
+        t.join();
+    }
+    linea.avisarMantenimiento();
+    linea.cerrarEstaciones();
+    mantenimiento.join();
+    for (auto& g : generadores) {
+        g.join();
+    }
     vigilante.detener();
+
+    // Invariante final: pasajeros generados = transportados + esperando.
+    linea.comprobarFinal();
     return estadisticas.sinViolaciones();
 }
 
 int main(int argc, char* argv[]) {
     Config config(argc, argv);
-    // TODO: poner el nombre del caso, sus 6 claves y sus modos de fallo (el caso 5 añade "livelock").
-    Lanzador lanzador("caso", {}, {"carrera", "interbloqueo", "inanicion"});
+    Lanzador lanzador("ferrocarril",
+                      {"estaciones", "andenes", "trenes", "capacidad_tramo", "viajes", "t_tramo"},
+                      {"carrera", "interbloqueo", "inanicion"});
     return lanzador.ejecutar(config, ejecutarSimulacion);
 }
