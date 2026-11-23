@@ -27,7 +27,7 @@ void tareaConcurrente(Semaforo& semaforo, int idHilo) {
 int main() {
     std::cout << "=== INICIO DE LA PRUEBA DE SEMÁFORO (Módulo 3) ===\n";
 
-    const int numeroHilos = 5;
+    const int numeroHilos = 12; //Se lanzan 12 hilos
     std::vector<std::thread> hilos;
 
     // Lanzamos varios hilos concurrentes
