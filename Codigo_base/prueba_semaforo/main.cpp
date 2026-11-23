@@ -14,8 +14,8 @@ void tareaConcurrente(Semaforo& semaforo, int idHilo) {
 
     std::cout << "--> [Hilo " << idHilo << "] ¡EN LA SECCIÓN CRÍTICA!\n";
 
-    // Simulamos un trabajo dentro de la sección crítica (simula procesar algo durante 200ms)
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    // Simulamos un trabajo dentro de la sección crítica durante 300ms
+    std::this_thread::sleep_for(std::chrono::milliseconds(300));
 
     std::cout << "<-- [Hilo " << idHilo << "] Saliendo de la sección crítica.\n";
 
