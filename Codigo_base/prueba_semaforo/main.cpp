@@ -28,12 +28,12 @@ int main() {
     std::cout << "=== INICIO DE LA PRUEBA DE SEMÁFORO (Módulo 3) ===\n";
 
     const int numeroHilos = 12; //Se lanzan 12 hilos
-    const int capacidadSemaforo = 3; 
+    const int capacidadSemaforo = 3; //Capacidqad 3
     Semaforo semaforoCapacidad(capacidadSemaforo);
 
     std::vector<std::thread> hilos;
 
-    // Lanzamos varios hilos concurrentes
+    // Lanzamos 12 hilos concurrentes pasandoles el semaforo por referencia
     for (int i = 0; i < numeroHilos; ++i) {
         hilos.emplace_back(tareaConcurrente, std::ref(semaforoCapacidad, i + 1);
     }
