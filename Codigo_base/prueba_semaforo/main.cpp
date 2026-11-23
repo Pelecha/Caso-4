@@ -25,10 +25,13 @@ void tareaConcurrente(Semaforo& semaforo, int idHilo) {
 }
 
 void comprobarTimeoutCero() {
+    //Inicializo Semaforo en 0 para forzar que expire el tiempo de espera
     Semaforo semaforoCero(0);
 
+    //Pongo de tiempo de espera como maximo 50 ms a poder adquirir el semaforo
     bool adquirido = semaforoCero.tryAcquireFor(std::chrono::milliseconds(50));
 
+    //Como esta en 0, debe expirar, devolver false, e imprimir OM
     if (!adquirido) {
         std::cout << "OK\n";
     }
