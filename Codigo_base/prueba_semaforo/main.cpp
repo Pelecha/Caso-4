@@ -25,6 +25,7 @@ void tareaConcurrente(Semaforo& semaforo, int idHilo) {
 }
 
 void comprobarTimeoutCero() {
+
     //Inicializo Semaforo en 0 para forzar que expire el tiempo de espera
     Semaforo semaforoCero(0);
 
@@ -41,7 +42,7 @@ void comprobarTimeoutCero() {
 }
 
 int main() {
-    std::cout << "=== INICIO DE LA PRUEBA DE SEMÁFORO (Módulo 3) ===\n";
+    std::cout << "=== INICIO DE LA PRUEBA DE SEMÁFORO (12 hilos, Módulo 3) ===\n";
 
     const int numeroHilos = 12; //Se lanzan 12 hilos
     const int capacidadSemaforo = 3; //Capacidqad 3
@@ -62,6 +63,6 @@ int main() {
     //Comprobamos tryAcquireFor(50 ms) con un semaforo en 0
     comprobarTimeoutCero();
 
-    std::cout << "=== PRUEBA DE SEMÁFORO FINALIZADA CON ÉXITO ===\n";
+    std::cout << "=== FIN DE PRUEBA SEMAFORO ===\n";
     return 0;
 }
