@@ -24,6 +24,19 @@ void tareaConcurrente(Semaforo& semaforo, int idHilo) {
 
 }
 
+void comprobarTimeoutCero() {
+    Semaforo semaforoCero(0);
+
+    bool adquirido = semaforoCero.tryAcquireFor(std::chrono::milliseconds(50));
+
+    if (!adquirido) {
+        std::cout << "OK\n";
+    }
+    else {
+        std::cout << "ERROR: tryAcquireFor no deberia adquirir con valor 0\n";
+    }
+}
+
 int main() {
     std::cout << "=== INICIO DE LA PRUEBA DE SEMÁFORO (Módulo 3) ===\n";
 
