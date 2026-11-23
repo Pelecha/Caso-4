@@ -4,11 +4,7 @@
 #include <chrono>       // Para manejar tiempos y pausas (std::this_thread::sleep_for)
 #include "Semaforo.h"   // Importa la clase Semaforo programada por tu compañero
 
-// Prueba de la clase Semaforo frente a std::counting_semaphore (apartado 1.4 del enunciado).
-// TODO: implementar.
-
-// Instanciamos nuestro semáforo con valor inicial 1 (exclusión mutua)
-Semaforo semaforoPrueba(1);
+//El semaforo con capacidad 3 se crea dentro de main y se pasa a los hilos
 
 void tareaConcurrente(int idHilo) {
     std::cout << "[Hilo " << idHilo << "] Intentando entrar en la sección crítica...\n";
