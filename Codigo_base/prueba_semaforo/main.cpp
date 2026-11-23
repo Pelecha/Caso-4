@@ -6,7 +6,7 @@
 
 //El semaforo con capacidad 3 se crea dentro de main y se pasa a los hilos
 
-void tareaConcurrente(int idHilo) {
+void tareaConcurrente(Semaforo& semaforo, int idHilo) {
     std::cout << "[Hilo " << idHilo << "] Intentando entrar en la sección crítica...\n";
 
     // Probamos la adquisición del semáforo
