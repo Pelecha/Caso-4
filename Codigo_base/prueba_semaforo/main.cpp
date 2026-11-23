@@ -7,20 +7,21 @@
 //El semaforo con capacidad 3 se crea dentro de main y se pasa a los hilos
 
 void tareaConcurrente(Semaforo& semaforo, int idHilo) {
-    std::cout << "[Hilo " << idHilo << "] Intentando entrar en la sección crítica...\n";
+    const int iteraciones = 20; 
+    
+    for (int iter = 0; iter < iteraciones; ++iter) {
+        // Probamos la adquisición del semáforo
+        semaforoPrueba.acquire(); // Si el semáforo está en 0, el hilo se queda aquí esperando dormido.
 
-    // Probamos la adquisición del semáforo
-    semaforoPrueba.acquire(); // Si el semáforo está en 0, el hilo se queda aquí esperando dormido.
+        // Simulamos un trabajo dentro de la sección crítica durante 300ms
+        std::this_thread::sleep_for(std::chrono::milliseconds(300));
 
-    std::cout << "--> [Hilo " << idHilo << "] ¡EN LA SECCIÓN CRÍTICA!\n";
+        // Liberamos el semáforo para que otro hilo que esté esperando pueda entrar
+        semaforoPrueba.release();
+    }
 
-    // Simulamos un trabajo dentro de la sección crítica durante 300ms
-    std::this_thread::sleep_for(std::chrono::milliseconds(300));
+    std::cout << "[Hilo " << idHilo << "] ha completado las 20 iteraciones.\n";
 
-    std::cout << "<-- [Hilo " << idHilo << "] Saliendo de la sección crítica.\n";
-
-    // Liberamos el semáforo para que otro hilo que esté esperando pueda entrar
-    semaforoPrueba.release();
 }
 
 int main() {
