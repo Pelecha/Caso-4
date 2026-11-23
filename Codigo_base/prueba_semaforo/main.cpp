@@ -7,7 +7,7 @@
 //El semaforo con capacidad 3 se crea dentro de main y se pasa a los hilos
 
 void tareaConcurrente(Semaforo& semaforo, int idHilo) {
-    const int iteraciones = 20; 
+    const int iteraciones = 20; //Cada hilo repite 20 iteraciones
     
     for (int iter = 0; iter < iteraciones; ++iter) {
         // Probamos la adquisición del semáforo
