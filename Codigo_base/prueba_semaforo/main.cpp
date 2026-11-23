@@ -6,32 +6,53 @@
 
 //El semaforo con capacidad 3 se crea dentro de main y se pasa a los hilos
 
-void tareaConcurrente(int idHilo) {
-    std::cout << "[Hilo " << idHilo << "] Intentando entrar en la sección crítica...\n";
+void tareaConcurrente(Semaforo& semaforo, int idHilo) {
+    const int iteraciones = 20; //Cada hilo repite 20 iteraciones
+    
+    for (int iter = 0; iter < iteraciones; ++iter) {
+        // Probamos la adquisición del semáforo
+        semaforoPrueba.acquire(); // Si el semáforo está en 0, el hilo se queda aquí esperando dormido.
 
-    // Probamos la adquisición del semáforo
-    semaforoPrueba.acquire(); // Si el semáforo está en 0, el hilo se queda aquí esperando dormido.
+        // Simulamos un trabajo dentro de la sección crítica durante 300ms
+        std::this_thread::sleep_for(std::chrono::milliseconds(300));
 
-    std::cout << "--> [Hilo " << idHilo << "] ¡EN LA SECCIÓN CRÍTICA!\n";
+        // Liberamos el semáforo para que otro hilo que esté esperando pueda entrar
+        semaforoPrueba.release();
+    }
 
-    // Simulamos un trabajo dentro de la sección crítica (simula procesar algo durante 200ms)
-    std::this_thread::sleep_for(std::chrono::milliseconds(200));
+    std::cout << "[Hilo " << idHilo << "] ha completado las 20 iteraciones.\n";
 
-    std::cout << "<-- [Hilo " << idHilo << "] Saliendo de la sección crítica.\n";
+}
 
-    // Liberamos el semáforo para que otro hilo que esté esperando pueda entrar
-    semaforoPrueba.release();
+void comprobarTimeoutCero() {
+
+    //Inicializo Semaforo en 0 para forzar que expire el tiempo de espera
+    Semaforo semaforoCero(0);
+
+    //Pongo de tiempo de espera como maximo 50 ms a poder adquirir el semaforo
+    bool adquirido = semaforoCero.tryAcquireFor(std::chrono::milliseconds(50));
+
+    //Como esta en 0, debe expirar, devolver false, e imprimir OM
+    if (!adquirido) {
+        std::cout << "OK\n";
+    }
+    else {
+        std::cout << "ERROR: tryAcquireFor no deberia adquirir con valor 0\n";
+    }
 }
 
 int main() {
-    std::cout << "=== INICIO DE LA PRUEBA DE SEMÁFORO (Módulo 3) ===\n";
+    std::cout << "=== INICIO DE LA PRUEBA DE SEMÁFORO (12 hilos, Módulo 3) ===\n";
 
-    const int numeroHilos = 5;
+    const int numeroHilos = 12; //Se lanzan 12 hilos
+    const int capacidadSemaforo = 3; //Capacidqad 3
+    Semaforo semaforoCapacidad(capacidadSemaforo);
+
     std::vector<std::thread> hilos;
 
-    // Lanzamos varios hilos concurrentes
+    // Lanzamos 12 hilos concurrentes pasandoles el semaforo por referencia
     for (int i = 0; i < numeroHilos; ++i) {
-        hilos.emplace_back(tareaConcurrente, i + 1);
+        hilos.emplace_back(tareaConcurrente, std::ref(semaforoCapacidad, i + 1);
     }
 
     // Esperamos a que todos los hilos terminen de ejecutarse antes de cerrar el programa
@@ -39,6 +60,9 @@ int main() {
         t.join();
     }
 
-    std::cout << "=== PRUEBA DE SEMÁFORO FINALIZADA CON ÉXITO ===\n";
+    //Comprobamos tryAcquireFor(50 ms) con un semaforo en 0
+    comprobarTimeoutCero();
+
+    std::cout << "=== FIN DE PRUEBA SEMAFORO ===\n";
     return 0;
 }
