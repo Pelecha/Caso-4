@@ -59,6 +59,9 @@ int main() {
         t.join();
     }
 
+    //Comprobamos tryAcquireFor(50 ms) con un semaforo en 0
+    comprobarTimeoutCero();
+
     std::cout << "=== PRUEBA DE SEMÁFORO FINALIZADA CON ÉXITO ===\n";
     return 0;
 }
