@@ -17,46 +17,29 @@ Al limitar la capacidad a 1, solo pasa un tren cada vez por cada tramo, aunque v
 **Con `--capacidad_tramo 4`:**
 Aquí pueden meterse hasta 4 trenes a la vez en el mismo tramo si van en el mismo sentido y no toca mantenimiento. La espera para entrar al tramo bajará muchísimo; los trenes solo frenarán cuando venga otro de frente o cuando salte el mantenimiento (5 ms cada 30 ms). Lo que sí subirá un poco es la espera por andén: como entran en grupo al tramo, llegan varios de golpe a la estación y, al haber solo 2 andenes por sentido, el tercero tendrá que esperar antes de entrar al tramo a que se vacíe uno. En general terminará bastante antes que con capacidad 1, aunque no cuatro veces más rápido por los cambios de sentido y el límite de andenes.
 
-### Resultados obtenidos (Hito 2)
-
-| Métrica | `--capacidad_tramo 1` | `--capacidad_tramo 4` |
-| :--- | :--- | :--- |
-| Tiempo total | 1452 ms | 1259 ms |
-| Espera tren (tramo) | media: 10.73 ms (max: 79.12 ms) | media: 5.35 ms (max: 47.23 ms) |
-| Espera tren (andén) | media: 3.08 ms (max: 47.30 ms) | media: 1.79 ms (max: 47.25 ms) |
-| Espera mantenimiento | media: 3.34 ms (max: 16.06 ms) | media: 6.15 ms (max: 16.06 ms) |
-
-**Conclusiones tras medir:**
-- Al aumentar la capacidad de tramo de 1 a 4, la espera media de los trenes en los tramos se reduce a la mitad (pasa de 10.73 ms a 5.35 ms), lo que hace que el tiempo total de la simulación disminuya de 1452 ms a 1259 ms.
-- En cambio, la espera de mantenimiento aumenta (pasa de 3.34 ms a 6.15 ms de media). Esto ocurre porque al haber más trenes circulando simultáneamente en un mismo tramo, cuando el mantenimiento intenta cerrar la vía tiene que esperar más tiempo a que salgan todos los trenes que estaban dentro hasta que el contador queda a 0.
-- El tiempo global no se reduce cuatro veces porque la vía única sigue exigiendo alternancia de sentidos (no pueden cruzarse trenes en sentido opuesto) y porque los andenes de las estaciones actúan como cuello de botella cuando varios trenes llegan en convoy.
-
----
-
-### Resultados medidos (Hito 2)
+### Resultados reales
 
 | Métrica | `--capacidad_tramo 1` | `--capacidad_tramo 4` |
 |---|---|---|
-| Espera media tren (tramo) | 3.37 ms (máx 17.66 ms) | 1.15 ms (máx 9.82 ms) |
-| Espera media tren (andén) | 1.43 ms (máx 13.87 ms) | 0.31 ms (máx 7.35 ms) |
-| Espera media mantenimiento | 1.47 ms (máx 3.77 ms) | 1.70 ms (máx 3.53 ms) |
+| Espera media tren en tramo | 3.37 ms, máx 17.66 ms | 1.15 ms, máx 9.82 ms |
+| Espera media tren en andén | 1.43 ms, máx 13.87 ms | 0.31 ms, máx 7.35 ms |
+| Espera media mantenimiento | 1.47 ms, máx 3.77 ms | 1.70 ms, máx 3.53 ms |
 | Pasajeros generados | 1240 | 789 |
 | Pasajeros transportados | 1180 | 752 |
 | Esperando al final | 60 | 37 |
 | Trabajos de mantenimiento | 8 | 5 |
 | Invariantes | OK | OK |
 
-### Conclusiones
-Se cumple lo que esperábamos en el Hito 1. Con capacidad 4 pueden ir varios trenes a la vez en el mismo sentido, así que la espera media en tramo baja de 3.37 ms a 1.15 ms y en andén de 1.43 ms a 0.31 ms. Al terminar los 300 viajes bastante antes, da tiempo a que se generen menos pasajeros (789 frente a 1240) y el mantenimiento entra menos veces (5 frente a 8). Su espera media sube un poco (1.70 ms frente a 1.47 ms) porque a veces pilla más trenes dentro del tramo antes de que se vacíe.
+Se cumple lo que habíamos previsto en el Hito 1. Al subir la capacidad a 4 pueden pasar varios trenes seguidos en el mismo sentido, así que la espera en tramo baja de 3.37 ms a 1.15 ms y en andén de 1.43 ms a 0.31 ms. Como los 300 viajes se acaban bastante antes, se generan menos pasajeros durante la ejecución y hacen falta menos ciclos de mantenimiento. Lo único que sube un poco es la espera del propio mantenimiento, porque al haber más trenes dentro del tramo a la vez tarda algo más en vaciarse.
 
 ---
 
-## 2. Pruebas de estrés y modos de fallo (`--estres 10`)
+## 2. Pruebas de estrés y modos de fallo
 
-- Ejecución normal (`--estres 10`): 10 de 10 OK, sin invariantes rotos.
-- Modo `carrera`: falla en las 10 repeticiones (`INVARIANTE ROTO -> trenes en sentidos opuestos` en los tramos 1, 2 y 3) porque al comprobar y entrar en bloqueos distintos se cuelan trenes de frente.
-- Modo `interbloqueo`: en la primera ejecución ya salta el `Vigilante` a los 2000 ms (tras 17 viajes) y corta el programa al quedarse los trenes bloqueados pidiendo andén desde dentro del tramo.
-- Modo `inanicion` (con carga alta): falla las 10 veces (`INVARIANTE ROTO -> tramo 0: mantenimiento sufre inanicion esperando tramo vacio`), con esperas de entre 53 ms y 1013 ms sin poder entrar.
+- Con `--estres 10` normal pasan las 10 ejecuciones seguidas sin romper ningún invariante.
+- Con `--fallo carrera` fallan las 10 repeticiones porque entran trenes en sentidos opuestos a la vez en los tramos 1, 2 y 3.
+- Con `--fallo interbloqueo` salta el vigilante a los 2000 ms en la primera ejecución tras 17 viajes, ya que los trenes se quedan bloqueados pidiendo andén desde dentro del tramo.
+- Con `--fallo inanicion` y carga alta fallan las 10 veces: el mantenimiento se queda esperando en el tramo 0 entre 53 ms y 1013 ms sin llegar a entrar.
 
 ## 3. Competición (`competicion/Producto.cpp`) - Hito 2
 
