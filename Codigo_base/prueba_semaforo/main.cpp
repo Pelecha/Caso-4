@@ -8,15 +8,31 @@
 
 //El semaforo con capacidad 3 se crea dentro de main y se pasa a los hilos
 
-void tareaConcurrente(Semaforo& semaforo, int idHilo) {
+void tareaConcurrente(Semaforo& semaforo, int idHilo, std::mutex& mutexContador, int& dentro, int& maximoDentro) {
     const int iteraciones = 20; //Cada hilo repite 20 iteraciones
     
     for (int iter = 0; iter < iteraciones; ++iter) {
         // Probamos la adquisición del semáforo
         semaforo.acquire(); // Si el semáforo está en 0, el hilo se queda aquí esperando dormido.
 
+        // Cuenta cuantos hilos estan dentro al mismo tiempo
+        {
+            std::lock_guard<std::mutex> lock(mutexContador);
+            dentro++;
+
+            if (dentro > maximoDentro) {
+                maximoDentro = dentro;
+            }
+        }
+
         // Simulamos un trabajo dentro de la sección crítica durante 300ms
-        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        std::this_thread::sleep_for(std::chrono::microseconds(300));
+
+        // Este hilo sale de la zona protegida
+        {
+            std::lock_guard<std::mutex> lock(mutexContador);
+            dentro--;
+        }
 
         // Liberamos el semáforo para que otro hilo que esté esperando pueda entrar
         semaforo.release();
@@ -24,6 +40,71 @@ void tareaConcurrente(Semaforo& semaforo, int idHilo) {
 
     std::cout << "[Hilo " << idHilo << "] ha completado las 20 iteraciones.\n";
 
+}
+
+void tareaConcurrenteEstandar(std::counting_semaphore<3>& semaforo, int idHilo, std::mutex& mutexContador, int& dentro, int& maximoDentro) {
+    const int iteraciones = 20; //Cada hilo repite 20 iteraciones
+
+    for (int iter = 0; iter < iteraciones; ++iter) {
+        // Probamos la adquisición del semáforo
+        semaforo.acquire(); // Si el semáforo está en 0, el hilo se queda aquí esperando dormido.
+
+        // Cuenta cuantos hilos estan dentro al mismo tiempo
+        {
+            std::lock_guard<std::mutex> lock(mutexContador);
+            dentro++;
+
+            if (dentro > maximoDentro) {
+                maximoDentro = dentro;
+            }
+        }
+
+        // Simulamos un trabajo dentro de la sección crítica durante 300ms
+        std::this_thread::sleep_for(std::chrono::microseconds(300));
+
+        // Este hilo sale de la zona protegida
+        {
+            std::lock_guard<std::mutex> lock(mutexContador);
+            dentro--;
+        }
+
+        // Liberamos el semáforo para que otro hilo que esté esperando pueda entrar
+        semaforo.release();
+    }
+
+    std::cout << "[Hilo " << idHilo << "] ha completado las 20 iteraciones.\n";
+
+}
+
+int probarSemaforoPropio() {
+    const int numeroHilos = 12; //Se lanzan 12 hilos
+    const int capacidadSemaforo = 3; //Capacidqad 3
+
+    Semaforo semaforoCapacidad(capacidadSemaforo);
+    std::mutex mutexContador;
+    int dentro = 0;
+    int maximoDentro = 0;
+    std::vector<std::thread> hilos;
+
+    for (int i = 0; i < numeroHilos; ++i) {
+        hilos.emplace_back([&, i]() {
+            tareaConcurrente(semaforoCapacidad, i + 1, mutexContador, dentro, maximoDentro);
+            });
+    }
+
+    for (std::thread& hilo : hilos) {
+        hilo.join();
+    }
+
+    std::cout << "Maximo de hilos dentro: " << maximoDentro << " de " << capacidadSemaforo << "\n";
+
+    if (maximoDentro > capacidadaSemaforo || dentro != 0) {
+        std::cout << "ERROR: se supero la capacidad del Semaforo propio \n";
+        return 1;
+    }
+
+    std::cout << "Prueba de concurrencia del Semaforo propio: OK \n"
+        return 0;
 }
 
 void comprobarTimeoutCero() {
