@@ -24,7 +24,7 @@ void tareaConcurrente(Semaforo& semaforo, int idHilo, std::mutex& mutexContador,
             }
         }
 
-        // Simulamos un trabajo dentro de la sección crítica durante 300ms
+        // Simulamos un trabajo dentro de la sección crítica durante 300μs
         std::this_thread::sleep_for(std::chrono::microseconds(300));
 
         // Este hilo sale de la zona protegida
@@ -59,7 +59,7 @@ void tareaConcurrenteEstandar(std::counting_semaphore<3>& semaforo, int idHilo, 
             }
         }
 
-        // Simulamos un trabajo dentro de la sección crítica durante 300ms
+        // Simulamos un trabajo dentro de la sección crítica durante 300μs
         std::this_thread::sleep_for(std::chrono::microseconds(300));
 
         // Este hilo sale de la zona protegida
