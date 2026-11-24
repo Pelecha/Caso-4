@@ -46,17 +46,17 @@ Aquí pueden meterse hasta 4 trenes a la vez en el mismo tramo si van en el mism
 | Trabajos de mantenimiento | 8 | 5 |
 | Invariantes | OK | OK |
 
-### Conclusiones de la comparativa
-Se cumple la predicción del Hito 1: al subir la capacidad del tramo de 1 a 4, varios trenes en el mismo sentido pueden circular a la vez por la vía y la espera media en tramo cae casi a un tercio (de 3.37 ms a 1.15 ms), reduciendo también la espera en andén de 1.43 ms a 0.31 ms. Al completarse los 300 viajes más rápido, se generan menos pasajeros durante la simulación (789 frente a 1240) y hacen falta menos ciclos de mantenimiento (5 frente a 8). La espera media de mantenimiento sube ligeramente (de 1.47 ms a 1.70 ms) porque puede coincidir con más trenes dentro del tramo antes de que se vacíe.
+### Conclusiones
+Se cumple lo que esperábamos en el Hito 1. Con capacidad 4 pueden ir varios trenes a la vez en el mismo sentido, así que la espera media en tramo baja de 3.37 ms a 1.15 ms y en andén de 1.43 ms a 0.31 ms. Al terminar los 300 viajes bastante antes, da tiempo a que se generen menos pasajeros (789 frente a 1240) y el mantenimiento entra menos veces (5 frente a 8). Su espera media sube un poco (1.70 ms frente a 1.47 ms) porque a veces pilla más trenes dentro del tramo antes de que se vacíe.
 
 ---
 
 ## 2. Pruebas de estrés y modos de fallo (`--estres 10`)
 
-- **Ejecución normal (`--estres 10`):** `10 OK, 0 con invariantes rotos`. Todas las repeticiones terminan sin bloqueos ni violaciones de invariantes.
-- **Modo `carrera` (`--fallo carrera --estres 10`):** `0 OK, 10 con invariantes rotos`. En todas las ejecuciones salta `INVARIANTE ROTO -> trenes en sentidos opuestos` (en los tramos 1, 2 y 3) al perderse la atomicidad entre comprobar y entrar al tramo.
-- **Modo `interbloqueo` (`--fallo interbloqueo --estres 10`):** En la primera ejecución salta el `Vigilante` (`sin progreso durante 2000 ms. Posible interbloqueo, livelock o despertar perdido`) tras 17 viajes y detiene el proceso al quedarse los trenes bloqueados esperando andén desde dentro del tramo.
-- **Modo `inanicion` (`--fallo inanicion` bajo carga):** `0 OK, 10 con invariantes rotos`. En las 10 repeticiones salta `INVARIANTE ROTO -> tramo 0: mantenimiento sufre inanicion esperando tramo vacio`, con esperas registradas entre 53 ms y 1013 ms.
+- Ejecución normal (`--estres 10`): 10 de 10 OK, sin invariantes rotos.
+- Modo `carrera`: falla en las 10 repeticiones (`INVARIANTE ROTO -> trenes en sentidos opuestos` en los tramos 1, 2 y 3) porque al comprobar y entrar en bloqueos distintos se cuelan trenes de frente.
+- Modo `interbloqueo`: en la primera ejecución ya salta el `Vigilante` a los 2000 ms (tras 17 viajes) y corta el programa al quedarse los trenes bloqueados pidiendo andén desde dentro del tramo.
+- Modo `inanicion` (con carga alta): falla las 10 veces (`INVARIANTE ROTO -> tramo 0: mantenimiento sufre inanicion esperando tramo vacio`), con esperas de entre 53 ms y 1013 ms sin poder entrar.
 
 ## 3. Competición (`competicion/Producto.cpp`) - Hito 2
 
