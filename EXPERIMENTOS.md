@@ -108,13 +108,16 @@ ferrocarril --fallo inanicion
 ## 3. Competición (`competicion/Producto.cpp`) - Hito 2
 
 - **Mediana de 5 ejecuciones (Release):**
-  - 1 hilo: -
-  - 2 hilos: -
-  - 4 hilos: -
-  - 8 hilos: -
+  - 1 hilo: 5607.93 ms
+  - 2 hilos: 4241.29 ms
+  - 4 hilos: 2479.73 ms
+  - 8 hilos: 1332.07 ms
 
 **Análisis:**
-Pendiente de medir en el Hito 2.
+- El cálculo consiste en calcular el producto de 2.000.000 de valores módulo 1000000007. Es un problema estrictamente dependiente de CPU.
+- Nuestra implementación reparte el rango $[0, 2000000)$ en bloques contiguos de igual tamaño para cada hilo. Cada hilo calcula su producto parcial de forma completamente independiente sobre una variable local, por lo que no hay sincronización intermedia ni bloqueo por mutex ni contención en memoria caché durante el grueso del cómputo.
+- Al final, el hilo principal une los resultados parciales con solo $hilos - 1$ multiplicaciones modulares.
+- Con 1 hilo tarda 5607.93 ms. Con 2 hilos baja a 4241.29 ms. Con 4 hilos baja a 2479.73 ms (speedup de 2.26x), y con 8 hilos se reduce a 1332.07 ms (speedup de 4.21x). La mejora de rendimiento es notable a medida que se aprovechan los núcleos lógicos del procesador.
 
 ---
 
