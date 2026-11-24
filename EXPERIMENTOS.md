@@ -41,6 +41,12 @@ Se cumple lo que habíamos previsto en el Hito 1. Al subir la capacidad a 4 pued
 - Con `--fallo interbloqueo` salta el vigilante a los 2000 ms en la primera ejecución tras 17 viajes, ya que los trenes se quedan bloqueados pidiendo andén desde dentro del tramo.
 - Con `--fallo inanicion` y carga alta fallan las 10 veces: el mantenimiento se queda esperando en el tramo 0 entre 53 ms y 1013 ms sin llegar a entrar.
 
+**Por qué el planificador hace que falle de manera distinta en cada ejecución:**
+- El planificador del sistema operativo reparte los tiempos de CPU de forma no determinista entre todos los hilos concurrentes, por lo que el entrelazado de instrucciones nunca es idéntico entre dos ejecuciones sucesivas.
+- En **carrera**, el fallo se fuerza soltando el cerrojo entre comprobar y anotar (`std::this_thread::yield()`); según el hilo que tome la CPU en ese instante, la colisión se manifiesta en el tramo 1, 2 o 3.
+- En **interbloqueo**, el momento en el que se cierra el ciclo de espera mutua depende de la velocidad relativa a la que avanzan los trenes en sentidos opuestos; por eso el número de viajes completados antes del bloqueo no es fijo (a veces 17, a veces 39 viajes).
+- En **inanición**, las pequeñas pausas de los trenes al subir/bajar pasajeros crean ventanas de tiempo variables, haciendo que la espera del mantenimiento oscile entre unas pocas decenas de milisegundos y más de 1 segundo.
+
 ## 3. Competición (`competicion/Producto.cpp`) - Hito 2
 
 - **Mediana de 5 ejecuciones (Release):**
