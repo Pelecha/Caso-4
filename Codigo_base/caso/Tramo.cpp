@@ -65,7 +65,7 @@ void Tramo::cerrarParaMantenimiento() {
     _ctx.estadisticas.registrarEspera("mantenimiento (tramo vacío)", duracion);
 
     if (_inanicion) {
-        long ms = std::chrono::duration_cast<std::chrono::milliseconds>(duracion).count();
+        auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(duracion).count();
         if (ms > 50) {
             _ctx.estadisticas.violacion("tramo " + std::to_string(_id) +
                                         ": mantenimiento sufre inanicion esperando tramo vacio (" +
