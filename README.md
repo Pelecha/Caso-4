@@ -24,6 +24,7 @@ El proyecto implementa estrictamente:
 ---
 
 ## 🛠️ Compilación
+
 El proyecto utiliza **CMake** y compila sin avisos bajo los flags estrictos requeridos (`-Wall -Wextra -Wpedantic`).
 
 ```bash
@@ -31,3 +32,65 @@ mkdir build
 cd build
 cmake ..
 cmake --build . --config Release
+```
+
+---
+
+## ▶️ Ejecución
+
+Una vez compilado el proyecto, se puede ejecutar la simulación de la línea de ferrocarril:
+
+```bash
+./ferrocarril
+```
+
+También se pueden modificar los parámetros de la simulación:
+
+```bash
+./ferrocarril --estaciones 5 --andenes 2 --trenes 10 --capacidad_tramo 2 --viajes 30 --t_tramo 3
+```
+
+Para mostrar los eventos de la simulación:
+
+```bash
+./ferrocarril --traza
+```
+
+---
+
+## 🧪 Pruebas
+
+Para ejecutar las pruebas de la clase `Semaforo`:
+
+```bash
+./prueba_semaforo
+```
+
+Para realizar diez ejecuciones de la simulación:
+
+```bash
+./ferrocarril --estres 10
+```
+
+También se pueden probar los diferentes modos de fallo:
+
+**Carrera:**
+
+```bash
+./ferrocarril --fallo carrera --estres 10
+```
+
+**Interbloqueo:**
+
+```bash
+./ferrocarril --fallo interbloqueo
+```
+
+**Inanición:**
+
+```bash
+./ferrocarril --fallo inanicion --estaciones 2 --andenes 30 --trenes 40 --capacidad_tramo 10 --t_tramo 10 --viajes 20 --estres 10
+```
+
+Estos comandos permiten comprobar los problemas de concurrencia que pueden aparecer durante la ejecución.
+
