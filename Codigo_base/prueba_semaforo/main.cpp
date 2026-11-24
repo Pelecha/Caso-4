@@ -8,12 +8,22 @@
 
 //El semaforo con capacidad 3 se crea dentro de main y se pasa a los hilos
 
-void tareaConcurrente(Semaforo& semaforo, int idHilo) {
+void tareaConcurrente(Semaforo& semaforo, int idHilo, std::mutex& mutexContador, int& dentro, int& maximoDentro) {
     const int iteraciones = 20; //Cada hilo repite 20 iteraciones
     
     for (int iter = 0; iter < iteraciones; ++iter) {
         // Probamos la adquisición del semáforo
         semaforo.acquire(); // Si el semáforo está en 0, el hilo se queda aquí esperando dormido.
+
+        // Cuenta cuantos hilos estan dentro al mismo tiempo
+        {
+            std::lock_guard<std::mutex> lock(mutexContador);
+            dentro++;
+
+            if (dentro > maximoDentro) {
+                maximoDentro = dentro;
+            }
+        }
 
         // Simulamos un trabajo dentro de la sección crítica durante 300ms
         std::this_thread::sleep_for(std::chrono::milliseconds(300));
