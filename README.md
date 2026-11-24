@@ -94,3 +94,56 @@ También se pueden probar los diferentes modos de fallo:
 
 Estos comandos permiten comprobar los problemas de concurrencia que pueden aparecer durante la ejecución.
 
+---
+
+## ⚡ Competición y medición de rendimiento
+
+Para medir el rendimiento del programa se utiliza el ejecutable `competicion`, que permite realizar el cálculo con diferentes números de hilos.
+
+Se realizan cinco mediciones para cada configuración:
+
+**1 hilo:**
+
+```bash
+./competicion --hilos 1 --veces 5 --comprobar
+```
+
+**2 hilos:**
+
+```bash
+./competicion --hilos 2 --veces 5 --comprobar
+```
+
+**4 hilos:**
+
+```bash
+./competicion --hilos 4 --veces 5 --comprobar
+```
+
+**8 hilos:**
+
+```bash
+./competicion --hilos 8 --veces 5 --comprobar
+```
+
+El parámetro `--hilos` indica el número de hilos utilizados y `--veces` el número de mediciones. El parámetro `--comprobar` verifica que el resultado obtenido coincide con el cálculo secuencial.
+
+### Resultados obtenidos
+
+| Número de hilos | Mediana |
+|---|---:|
+| 1 | 5607.93 ms |
+| 2 | 4241.29 ms |
+| 4 | 2479.73 ms |
+| 8 | 1332.07 ms |
+
+Como se puede observar, al aumentar el número de hilos disminuye el tiempo de ejecución, ya que el trabajo se reparte entre varios hilos.
+
+Para realizar estas mediciones se ha utilizado la configuración `Release`.
+
+---
+
+## 📄 Documentación adicional
+
+En el archivo `EXPERIMENTOS.md` se pueden consultar los experimentos realizados, las pruebas de fallos y los resultados obtenidos en la competición.
+
