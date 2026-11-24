@@ -11,13 +11,13 @@ void tareaConcurrente(Semaforo& semaforo, int idHilo) {
     
     for (int iter = 0; iter < iteraciones; ++iter) {
         // Probamos la adquisición del semáforo
-        semaforoPrueba.acquire(); // Si el semáforo está en 0, el hilo se queda aquí esperando dormido.
+        semaforo.acquire(); // Si el semáforo está en 0, el hilo se queda aquí esperando dormido.
 
         // Simulamos un trabajo dentro de la sección crítica durante 300ms
         std::this_thread::sleep_for(std::chrono::milliseconds(300));
 
         // Liberamos el semáforo para que otro hilo que esté esperando pueda entrar
-        semaforoPrueba.release();
+        semaforo.release();
     }
 
     std::cout << "[Hilo " << idHilo << "] ha completado las 20 iteraciones.\n";
@@ -52,7 +52,7 @@ int main() {
 
     // Lanzamos 12 hilos concurrentes pasandoles el semaforo por referencia
     for (int i = 0; i < numeroHilos; ++i) {
-        hilos.emplace_back(tareaConcurrente, std::ref(semaforoCapacidad, i + 1);
+        hilos.emplace_back(tareaConcurrente, std::ref(semaforoCapacidad), i + 1);
     }
 
     // Esperamos a que todos los hilos terminen de ejecutarse antes de cerrar el programa
