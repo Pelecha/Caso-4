@@ -109,7 +109,7 @@ int probarSemaforoPropio() {
         return 1;
     }
 
-    std::cout << "Prueba de concurrencia del Semaforo propio: OK \n"
+    std::cout << "Prueba de concurrencia del Semaforo propio: OK \n";
         return 0;
 }
 
@@ -177,7 +177,7 @@ int comprobarTimeoutCeroEstandar() {
     std::counting_semaphore<3> semaforoCero(0);
 
     //Pongo de tiempo de espera como maximo 50 ms a poder adquirir el semaforo
-    const bool adquirido = semaforoCero.tryAcquireFor(std::chrono::milliseconds(50));
+    const bool adquirido = semaforoCero.try_acquire_for(std::chrono::milliseconds(50));
 
     //Como esta en 0, debe expirar, devolver false, e imprimir OM
     if (!adquirido) {
