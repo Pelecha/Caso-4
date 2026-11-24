@@ -158,6 +158,25 @@ int comprobarTimeoutCero() {
     }
 }
 
+int comprobarTimeoutCeroEstandar() {
+
+    //Inicializo Semaforo en 0 para forzar que expire el tiempo de espera
+    std::counting_semaphore<3> semaforoCero(0);
+
+    //Pongo de tiempo de espera como maximo 50 ms a poder adquirir el semaforo
+    const bool adquirido = semaforoCero.tryAcquireFor(std::chrono::milliseconds(50));
+
+    //Como esta en 0, debe expirar, devolver false, e imprimir OM
+    if (!adquirido) {
+        std::cout << "OK\n";
+        return 0;
+    }
+    else {
+        std::cout << "ERROR: tryAcquireFor no deberia adquirir con valor 0\n";
+        return 1;
+    }
+}
+
 int main() {
     std::cout << "=== INICIO DE LA PRUEBA DE SEMÁFORO (12 hilos, Módulo 3) ===\n";
 
