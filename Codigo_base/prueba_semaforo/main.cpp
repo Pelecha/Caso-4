@@ -3,6 +3,8 @@
 #include <vector>       // Para guardar los hilos en un vector dinámico y controlarlos fácilmente
 #include <chrono>       // Para manejar tiempos y pausas (std::this_thread::sleep_for)
 #include "Semaforo.h"   // Importa la clase Semaforo programada por tu compañero
+#include <mutex>        // Para medir cuantos hilos entran a la vez
+#include <semaphore>    // Para probar tambien el semaforo estandar 
 
 //El semaforo con capacidad 3 se crea dentro de main y se pasa a los hilos
 
