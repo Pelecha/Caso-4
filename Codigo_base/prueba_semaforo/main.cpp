@@ -180,25 +180,31 @@ int comprobarTimeoutCeroEstandar() {
 int main() {
     std::cout << "=== INICIO DE LA PRUEBA DE SEMÁFORO (12 hilos, Módulo 3) ===\n";
 
-    const int numeroHilos = 12; //Se lanzan 12 hilos
-    const int capacidadSemaforo = 3; //Capacidqad 3
-    Semaforo semaforoCapacidad(capacidadSemaforo);
+    int error = 0;
 
-    std::vector<std::thread> hilos;
-
-    // Lanzamos 12 hilos concurrentes pasandoles el semaforo por referencia
-    for (int i = 0; i < numeroHilos; ++i) {
-        hilos.emplace_back(tareaConcurrente, std::ref(semaforoCapacidad), i + 1);
+    if (probarSemaforoPropio() != 0) {
+        error = 1;
     }
 
-    // Esperamos a que todos los hilos terminen de ejecutarse antes de cerrar el programa
-    for (auto& t : hilos) {
-        t.join();
+    if (comprobarTimeoutCero() != 0) {
+        error = 1;
     }
 
-    //Comprobamos tryAcquireFor(50 ms) con un semaforo en 0
-    comprobarTimeoutCero();
+    if (probarSemaforoEstandar() != 0) {
+        error = 1;
+    }
+
+    if (comprobarTimeoutCeroEstandar() != 0) {
+        error = 1;
+    }
+
+    if (error == 0) {
+        std::cout << "Todas las pruebas han pasado: OK \n";
+    }
+    else {
+        std::cout << "Ha fallado alguna prueba \n";
+    }
 
     std::cout << "=== FIN DE PRUEBA SEMAFORO ===\n";
-    return 0;
+    return error;
 }
