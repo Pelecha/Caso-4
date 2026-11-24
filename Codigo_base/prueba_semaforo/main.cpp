@@ -26,7 +26,13 @@ void tareaConcurrente(Semaforo& semaforo, int idHilo, std::mutex& mutexContador,
         }
 
         // Simulamos un trabajo dentro de la sección crítica durante 300ms
-        std::this_thread::sleep_for(std::chrono::milliseconds(300));
+        std::this_thread::sleep_for(std::chrono::microseconds(300));
+
+        // Este hilo sale de la zona protegida
+        {
+            std::lock_guard<std::mutex> lock(mutexContador);
+            dentro--;
+        }
 
         // Liberamos el semáforo para que otro hilo que esté esperando pueda entrar
         semaforo.release();
