@@ -21,13 +21,15 @@ Aquí pueden meterse hasta 4 trenes a la vez en el mismo tramo si van en el mism
 
 | Métrica | `--capacidad_tramo 1` | `--capacidad_tramo 4` |
 | :--- | :--- | :--- |
-| Tiempo total | - | - |
-| Espera tren (tramo) | - | - |
-| Espera tren (andén) | - | - |
-| Espera mantenimiento | - | - |
+| Tiempo total | 1452 ms | 1259 ms |
+| Espera tren (tramo) | media: 10.73 ms (max: 79.12 ms) | media: 5.35 ms (max: 47.23 ms) |
+| Espera tren (andén) | media: 3.08 ms (max: 47.30 ms) | media: 1.79 ms (max: 47.25 ms) |
+| Espera mantenimiento | media: 3.34 ms (max: 16.06 ms) | media: 6.15 ms (max: 16.06 ms) |
 
 **Conclusiones tras medir:**
-Pendiente de ejecutar en el Hito 2.
+- Al aumentar la capacidad de tramo de 1 a 4, la espera media de los trenes en los tramos se reduce a la mitad (pasa de 10.73 ms a 5.35 ms), lo que hace que el tiempo total de la simulación disminuya de 1452 ms a 1259 ms.
+- En cambio, la espera de mantenimiento aumenta (pasa de 3.34 ms a 6.15 ms de media). Esto ocurre porque al haber más trenes circulando simultáneamente en un mismo tramo, cuando el mantenimiento intenta cerrar la vía tiene que esperar más tiempo a que salgan todos los trenes que estaban dentro hasta que el contador queda a 0.
+- El tiempo global no se reduce cuatro veces porque la vía única sigue exigiendo alternancia de sentidos (no pueden cruzarse trenes en sentido opuesto) y porque los andenes de las estaciones actúan como cuello de botella cuando varios trenes llegan en convoy.
 
 ---
 
@@ -45,7 +47,6 @@ Pendiente de redactar con las trazas del Hito 2.
 
 ## 3. Competición (`competicion/Producto.cpp`) - Hito 2
 
-- **Equipo:** MacBook Air
 - **Mediana de 5 ejecuciones (Release):**
   - 1 hilo: -
   - 2 hilos: -
