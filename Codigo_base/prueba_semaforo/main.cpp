@@ -76,6 +76,37 @@ void tareaConcurrenteEstandar(std::counting_semaphore<3>& semaforo, int idHilo, 
 
 }
 
+int probarSemaforoPropio() {
+    const int numeroHilos = 12; //Se lanzan 12 hilos
+    const int capacidadSemaforo = 3; //Capacidqad 3
+
+    Semaforo semaforoCapacidad(capacidadSemaforo);
+    std::mutex mutexContador;
+    int dentro = 0;
+    int maximoDentro = 0;
+    std::vector<std::thread> hilos;
+
+    for (int i = 0; i < numeroHilos; ++i) {
+        hilos.emplace_back([&, i]() {
+            tareaConcurrente(semaforoCapacidad, i + 1, mutexContador, dentro, maximoDentro);
+            });
+    }
+
+    for (std::thread& hilo : hilos) {
+        hilo.join();
+    }
+
+    std::cout << "Maximo de hilos dentro: " << maximoDentro << " de " << capacidadSemaforo << "\n";
+
+    if (maximoDentro > capacidadaSemaforo || dentro != 0) {
+        std::cout << "ERROR: se supero la capacidad del Semaforo propio \n";
+        return 1;
+    }
+
+    std::cout << "Prueba de concurrencia del Semaforo propio: OK \n"
+        return 0;
+}
+
 void comprobarTimeoutCero() {
 
     //Inicializo Semaforo en 0 para forzar que expire el tiempo de espera
