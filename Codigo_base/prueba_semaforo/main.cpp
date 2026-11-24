@@ -104,7 +104,7 @@ int probarSemaforoPropio() {
     std::cout << "Maximo de hilos dentro: " << maximoDentro << " de " << capacidadSemaforo << "\n";
 
     // Comprueba que no se supero la capacidad y que el contador quedo en cero
-    if (maximoDentro > capacidadaSemaforo || dentro != 0) {
+    if (maximoDentro > capacidadSemaforo || dentro != 0) {
         std::cout << "ERROR: se supero la capacidad del Semaforo propio \n";
         return 1;
     }
