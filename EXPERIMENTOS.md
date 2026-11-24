@@ -33,77 +33,30 @@ Aquí pueden meterse hasta 4 trenes a la vez en el mismo tramo si van en el mism
 
 ---
 
-## 2. Pruebas de fallos (`--estres 10`) - Hito 2
+### Resultados medidos (Hito 2)
 
-- **Normal (`./ferrocarril --estres 10`):**
-```text
-ferrocarril (versión correcta)
+| Métrica | `--capacidad_tramo 1` | `--capacidad_tramo 4` |
+|---|---|---|
+| Espera media tren (tramo) | 3.37 ms (máx 17.66 ms) | 1.15 ms (máx 9.82 ms) |
+| Espera media tren (andén) | 1.43 ms (máx 13.87 ms) | 0.31 ms (máx 7.35 ms) |
+| Espera media mantenimiento | 1.47 ms (máx 3.77 ms) | 1.70 ms (máx 3.53 ms) |
+| Pasajeros generados | 1240 | 789 |
+| Pasajeros transportados | 1180 | 752 |
+| Esperando al final | 60 | 37 |
+| Trabajos de mantenimiento | 8 | 5 |
+| Invariantes | OK | OK |
 
---estres 10: 10 OK, 0 con invariantes rotos (misma configuración en todas).
-```
-Todas las iteraciones pasan sin errores ni violaciones.
-
-- **Carrera (`./ferrocarril --fallo carrera --estres 10`):**
-```text
-ferrocarril --fallo carrera
-  ejecución 1 de 10: INVARIANTE ROTO -> tramo 2: trenes en sentidos opuestos
-  ejecución 2 de 10: INVARIANTE ROTO -> tramo 2: trenes en sentidos opuestos
-  ejecución 3 de 10: INVARIANTE ROTO -> tramo 1: trenes en sentidos opuestos
-  ejecución 4 de 10: INVARIANTE ROTO -> tramo 1: trenes en sentidos opuestos
-  ejecución 5 de 10: INVARIANTE ROTO -> tramo 3: trenes en sentidos opuestos
-  ejecución 6 de 10: INVARIANTE ROTO -> tramo 2: trenes en sentidos opuestos
-  ejecución 7 de 10: INVARIANTE ROTO -> tramo 2: trenes en sentidos opuestos
-  ejecución 8 de 10: INVARIANTE ROTO -> tramo 2: trenes en sentidos opuestos
-  ejecución 9 de 10: INVARIANTE ROTO -> tramo 2: trenes en sentidos opuestos
-  ejecución 10 de 10: INVARIANTE ROTO -> tramo 2: trenes en sentidos opuestos
-
---estres 10: 0 OK, 10 con invariantes rotos (misma configuración en todas).
-```
-
-- **Interbloqueo (`./ferrocarril --fallo interbloqueo --estres 10`):**
-```text
-ferrocarril --fallo interbloqueo
-
-*** VIGILANTE (ejecución 1 de 10): sin progreso durante 2000 ms. Posible interbloqueo, livelock o despertar perdido. ***
-
-=== Esperas por tipo de hilo ===
-  mantenimiento (tramo vacío)                 n=     4  media=   15.76 ms  max=   16.04 ms
-  tren (andén)                                n=    49  media=    1.26 ms  max=   15.98 ms
-  tren (tramo)                                 n=    43  media=   10.84 ms  max=   92.95 ms
-=== Métricas ===
-  pasajeros generados                          227
-  trabajos de mantenimiento                    4
-  transportados                                56
-  viajes                                       39
-=== Invariantes ===
-  OK
-Se termina el proceso: los hilos bloqueados no se pueden despertar.
-```
-
-- **Inanición (`./ferrocarril --fallo inanicion --estaciones 2 --andenes 30 --trenes 40 --capacidad_tramo 10 --t_tramo 10 --viajes 20 --estres 10`):**
-```text
-ferrocarril --fallo inanicion
-  ejecución 1 de 10: INVARIANTE ROTO -> tramo 0: mantenimiento sufre inanicion esperando tramo vacio (360 ms)
-  ejecución 2 de 10: INVARIANTE ROTO -> tramo 0: mantenimiento sufre inanicion esperando tramo vacio (387 ms)
-  ejecución 3 de 10: INVARIANTE ROTO -> tramo 0: mantenimiento sufre inanicion esperando tramo vacio (1120 ms)
-  ejecución 4 de 10: INVARIANTE ROTO -> tramo 0: mantenimiento sufre inanicion esperando tramo vacio (762 ms)
-  ejecución 5 de 10: INVARIANTE ROTO -> tramo 0: mantenimiento sufre inanicion esperando tramo vacio (216 ms)
-  ejecución 6 de 10: INVARIANTE ROTO -> tramo 0: mantenimiento sufre inanicion esperando tramo vacio (983 ms)
-  ejecución 7 de 10: INVARIANTE ROTO -> tramo 0: mantenimiento sufre inanicion esperando tramo vacio (967 ms)
-  ejecución 8 de 10: INVARIANTE ROTO -> tramo 0: mantenimiento sufre inanicion esperando tramo vacio (1292 ms)
-  ejecución 9 de 10: INVARIANTE ROTO -> tramo 0: mantenimiento sufre inanicion esperando tramo vacio (466 ms)
-  ejecución 10 de 10: INVARIANTE ROTO -> tramo 0: mantenimiento sufre inanicion esperando tramo vacio (1305 ms)
-
---estres 10: 0 OK, 10 con invariantes rotos (misma configuración en todas).
-```
-
-**Por qué el planificador hace que falle de manera distinta en cada ejecución:**
-- El planificador del sistema operativo reparte los tiempos de CPU (cuantos de tiempo) de forma no determinista entre todos los hilos concurrentes. Por tanto, el entrelazado de instrucciones nunca es idéntico entre dos ejecuciones sucesivas.
-- En el modo **carrera**, el fallo se fuerza soltando el cerrojo entre la comprobación de vía libre y la actualización de los contadores (`std::this_thread::yield()`). Según el orden en el que el planificador despache los trenes listos, en unas ejecuciones la colisión ocurre en el tramo 1, en otras en el tramo 2 y en otras en el tramo 3.
-- En el modo **interbloqueo**, los trenes entran al tramo antes de reservar el andén de destino. Si dos trenes en sentidos opuestos entran a sus respectivos tramos y ambos intentan reservar andenes ya saturados por el otro sentido, se produce un ciclo de espera (deadlock). El momento en el que coincide esta combinación varía según la velocidad a la que el planificador avance cada tren; en cuanto se produce, ningún hilo avanza y el `Vigilante` detecta falta de progreso tras 2000 ms y aborta.
-- En el modo **inanición**, los trenes ignoran que el mantenimiento está solicitando el tramo. Con 40 trenes y alta carga, el tramo casi nunca queda a 0. Dependiendo de los pequeños desfases temporales que introduzca el planificador al suspender y reanudar hilos, el mantenimiento sufre esperas muy dispares en cada ejecución (oscilando entre 216 ms y más de 1300 ms).
+### Conclusiones de la comparativa
+Se cumple la predicción del Hito 1: al subir la capacidad del tramo de 1 a 4, varios trenes en el mismo sentido pueden circular a la vez por la vía y la espera media en tramo cae casi a un tercio (de 3.37 ms a 1.15 ms), reduciendo también la espera en andén de 1.43 ms a 0.31 ms. Al completarse los 300 viajes más rápido, se generan menos pasajeros durante la simulación (789 frente a 1240) y hacen falta menos ciclos de mantenimiento (5 frente a 8). La espera media de mantenimiento sube ligeramente (de 1.47 ms a 1.70 ms) porque puede coincidir con más trenes dentro del tramo antes de que se vacíe.
 
 ---
+
+## 2. Pruebas de estrés y modos de fallo (`--estres 10`)
+
+- **Ejecución normal (`--estres 10`):** `10 OK, 0 con invariantes rotos`. Todas las repeticiones terminan sin bloqueos ni violaciones de invariantes.
+- **Modo `carrera` (`--fallo carrera --estres 10`):** `0 OK, 10 con invariantes rotos`. En todas las ejecuciones salta `INVARIANTE ROTO -> trenes en sentidos opuestos` (en los tramos 1, 2 y 3) al perderse la atomicidad entre comprobar y entrar al tramo.
+- **Modo `interbloqueo` (`--fallo interbloqueo --estres 10`):** En la primera ejecución salta el `Vigilante` (`sin progreso durante 2000 ms. Posible interbloqueo, livelock o despertar perdido`) tras 17 viajes y detiene el proceso al quedarse los trenes bloqueados esperando andén desde dentro del tramo.
+- **Modo `inanicion` (`--fallo inanicion` bajo carga):** `0 OK, 10 con invariantes rotos`. En las 10 repeticiones salta `INVARIANTE ROTO -> tramo 0: mantenimiento sufre inanicion esperando tramo vacio`, con esperas registradas entre 53 ms y 1013 ms.
 
 ## 3. Competición (`competicion/Producto.cpp`) - Hito 2
 
